@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app">
+      <script type="module" src="/main.js"></script>
+      <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+        <input type="range" id="specisGeneration" min="1" max="50" value="1" />
+        <canvas id="canvas2"></canvas>
+      </div>
+      <div id="stats">
+        <h1 id="cells"></h1>
+        <div class="col">
+          <div class="stats-element">
+            <h2>Alive population</h2>
+            <p id="alive-stats"></p>
+          </div>
+          <div class="stats-element">
+            <h2>Dead population</h2>
+            <p id="dead-stats"></p>
+          </div>
+        </div>
+        <table id="cell-statistik"></table>
+      </div>
+    </div>
+  </body>
+</html>

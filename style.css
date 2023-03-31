@@ -1,0 +1,81 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+}
+
+#app {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+#canvas {
+  border: #000 3px solid;
+  position: relative;
+  top: 0px;
+  height: 100%;
+}
+
+#stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#stats > * {
+  margin-bottom: 1rem;
+}
+
+#cells {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0 0.25rem;
+  height: 1rem;
+  border: 1px solid #000;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+th {
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.stats-element {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+}
