@@ -4,7 +4,7 @@ export default class Food {
     this.y = y;
     this.radius = radius;
     this.color = color;
-    this.growthRate = Math.pow(Math.random() + 1, 6) / 1000;
+    this.growthRate = Math.pow(Math.random() + 1, 9) / 10000;
   }
 
   draw(c) {

@@ -9,23 +9,36 @@
     <div id="app">
       <script type="module" src="/main.js"></script>
       <div id="canvas-container">
-        <canvas id="canvas"></canvas>
-        <input type="range" id="specisGeneration" min="1" max="50" value="1" />
+        <div id="canvas-wrapper">
+          <canvas id="canvas"></canvas>
+        </div>
+        <h4 id="generationToShow"></h4>
+        <div>
+          <button id="prev">‹</button>
+          <input
+            type="range"
+            id="specisGeneration"
+            min="1"
+            max="500"
+            value="1"
+          />
+          <button id="next">›</button>
+        </div>
         <canvas id="canvas2"></canvas>
       </div>
       <div id="stats">
         <h1 id="cells"></h1>
         <div class="col">
           <div class="stats-element">
-            <h2>Alive population</h2>
             <p id="alive-stats"></p>
           </div>
           <div class="stats-element">
-            <h2>Dead population</h2>
             <p id="dead-stats"></p>
           </div>
         </div>
-        <table id="cell-statistik"></table>
+        <div id="table-wrapper">
+          <table id="cell-statistik"></table>
+        </div>
       </div>
     </div>
   </body>

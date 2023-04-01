@@ -11,8 +11,17 @@ const {
   FOOD_GROWTH_RATE,
 } = config;
 
-const { c, c2, aliveStats, deadStats, cellStatistik, generationSlider } =
-  init();
+const {
+  c,
+  c2,
+  aliveStats,
+  deadStats,
+  cellStatistik,
+  generationSlider,
+  generationSliderValue,
+  prevGeneration,
+  nextGeneration,
+} = init();
 
 const STARTING_CELL_OPTIONS = {
   id: [1],
@@ -22,14 +31,17 @@ const STARTING_CELL_OPTIONS = {
   speed: 0.01,
   orientation: Math.random() * 2 * Math.PI,
   radius: 6,
-  innerColor: { r: 100, g: 100, b: 100, o: 0.5 },
-  color: { r: 100, g: 100, b: 100, o: 0.5 },
+  innerColor: { r: 127, g: 127, b: 127, o: 0.5 },
+  color: { r: 127, g: 127, b: 127, o: 0.5 },
   jumpLength: 0.2,
   energiUpptagning: 1,
   delningsEffektivitet: 1,
-  maxEnergi: 400,
-  mutationRate: 0.1,
+  maxEnergi: 300,
+  mutationRate: 0.15,
   mutationAmount: 0.5,
+  targetOrientation: Math.random() * 2 * Math.PI,
+  orientationChangeSpeed: 0.1,
+  orientationChangeChance: 0.001,
 };
 
 function init() {
@@ -39,7 +51,18 @@ function init() {
   const deadStats = document.getElementById("dead-stats");
   const cellStatistik = document.getElementById("cell-statistik");
   const generationSlider = document.getElementById("specisGeneration");
+  const generationSliderValue = document.getElementById("generationToShow");
+  const prevGeneration = document.getElementById("prev");
+  const nextGeneration = document.getElementById("next");
   generationSlider.addEventListener("change", (e) => {
+    getArrayOfRelatives(cells, deadCells);
+  });
+  prevGeneration.addEventListener("click", (e) => {
+    generationSlider.value = parseInt(generationSlider.value) - 1;
+    getArrayOfRelatives(cells, deadCells);
+  });
+  nextGeneration.addEventListener("click", (e) => {
+    generationSlider.value = parseInt(generationSlider.value) + 1;
     getArrayOfRelatives(cells, deadCells);
   });
 
@@ -55,6 +78,7 @@ function init() {
     deadStats,
     cellStatistik,
     generationSlider,
+    generationSliderValue,
   };
 }
 
@@ -65,6 +89,8 @@ cells.push(cell);
 let activeSections = {};
 
 let deadCells = [];
+
+getArrayOfRelatives(cells, deadCells);
 
 const foodSections = drawFoodSections(
   SIZE_OF_CANVAS,
@@ -108,8 +134,8 @@ function updateSimulation() {
 
     cellLength = cells.length;
 
-    aliveStats.innerHTML = getStatsFromCellsArray(cells);
-    deadStats.innerHTML = getStatsFromCellsArray(deadCells);
+    aliveStats.innerHTML = getStatsFromCellsArray(cells, "Alive stats");
+    deadStats.innerHTML = getStatsFromCellsArray(deadCells, "Dead stats");
     cellStatistik.innerHTML = getStatsForIndividualCellsInArray(cells);
 
     if (cells.length === 0) {
@@ -122,9 +148,9 @@ function updateSimulation() {
 function getArrayOfRelatives(cells, deadCells) {
   let relatives = [];
   let allCells = cells.concat(deadCells);
-  let generationToPush = generationSlider.value;
+  let generationToDraw = generationSlider.value;
   for (let cell in cells) {
-    let parentID = cells[cell].id.slice(0, generationToPush);
+    let parentID = cells[cell].id.slice(0, generationToDraw);
     for (let cell in allCells) {
       if (
         JSON.stringify(allCells[cell].id) === JSON.stringify(parentID) &&
@@ -138,6 +164,7 @@ function getArrayOfRelatives(cells, deadCells) {
 }
 
 function drawDifferentSpecis(relatives) {
+  generationSliderValue.innerHTML = generationSlider.value;
   c2.clearRect(0, 0, SIZE_OF_CANVAS, SIZE_OF_CANVAS);
   let x = 100;
   let y = 100;
@@ -158,22 +185,24 @@ function getStatsForIndividualCellsInArray(arrayOfCells) {
 
   for (let cell in arrayOfCells) {
     statsRow += `<tr>
-    <td>${cells[cell].radius.toFixed(2)}</td> 
-    <td>${cells[cell].jumpLength.toFixed(2)}</td>
-    <td>${cells[cell].energiUpptagning.toFixed(2)}</td>
-    <td>${cells[cell].delningsEffektivitet.toFixed(2)}</td>
-    <td>${cells[cell].speed.toFixed(3)}</td>
-    <td>${cells[cell].id.length}</td>
-    <td>${cells[cell].maxEnergi.toFixed(0)} </td>
-    <td>${cells[cell].mutationRate.toFixed(2)}</td>
-    <td>${cells[cell].mutationAmount.toFixed(2)}</td>
+    <td id="${cells[cell].id}">${cells[cell].radius.toFixed(2)}</td> 
+    <td id="${cells[cell].id}">${cells[cell].jumpLength.toFixed(2)}</td>
+    <td id="${cells[cell].id}">${cells[cell].energiUpptagning.toFixed(2)}</td>
+    <td id="${cells[cell].id}">${cells[cell].delningsEffektivitet.toFixed(
+      2
+    )}</td>
+    <td id="${cells[cell].id}">${cells[cell].speed.toFixed(3)}</td>
+    <td id="${cells[cell].id}">${cells[cell].id.length}</td>
+    <td id="${cells[cell].id}">${cells[cell].maxEnergi.toFixed(0)} </td>
+    <td id="${cells[cell].id}">${cells[cell].mutationRate.toFixed(2)}</td>
+    <td id="${cells[cell].id}">${cells[cell].mutationAmount.toFixed(2)}</td>
     </tr>`;
   }
 
   return statsRubriker + "<tbody>" + statsRow + "</tbody>";
 }
 
-function getStatsFromCellsArray(arrayOfCells) {
+function getStatsFromCellsArray(arrayOfCells, heading) {
   let radius = 0;
   let jump = 0;
   let energiEff = 0;
@@ -191,7 +220,7 @@ function getStatsFromCellsArray(arrayOfCells) {
     }
   }
 
-  let stats = `
+  let stats = `<h2>${heading}</h2>
   <p>Size: ${radius.toFixed(2)} </p>
   <p>Wiggle: ${jump.toFixed(2)} </p>
   <p>Energy efficiency: ${energiEff.toFixed(2)} </p>
@@ -203,6 +232,13 @@ function getStatsFromCellsArray(arrayOfCells) {
 }
 
 function drawFamilyTree(cells) {
+  canvas2.style.display = "none";
+  aliveStats.style.display = "none";
+  deadStats.style.display = "none";
+  cellStatistik.style.display = "none";
+  generationSlider.style.display = "none";
+  generationSliderValue.style.display = "none";
+
   drawCanvas(canvas, window.innerWidth, 20000);
 
   cells.sort((a, b) => {
@@ -289,7 +325,7 @@ function drawFoodSections(SIZE_OF_CANVAS, AMOUNT_OF_FOOD, SECTION_SIZE) {
     let y = Math.random() * SIZE_OF_CANVAS;
     let radius = Math.min(
       (Math.random() * (SIZE_OF_STARTING_FOOD - 0) + 0) /
-        (Math.abs(Math.abs(x) - Math.abs(y)) / 100) +
+        (Math.abs(Math.abs(x) - Math.abs(y)) / 150) +
         0.01,
       SIZE_OF_STARTING_FOOD
     );
@@ -327,4 +363,104 @@ function updateActiveSections(activeSections, foodSections) {
   }
 
   return newActiveSections;
+}
+
+document.querySelector("table").addEventListener("mouseleave", (e) => {
+  removeHighlightFromCellOnCanvas(cells);
+});
+
+document.querySelector("table").addEventListener("mouseover", (e) => {
+  if (e.target.tagName === "TD") {
+    console.log(e.target.id);
+    highlightCellOnCanvas(cells, e.target.id);
+  }
+});
+
+//When holding mouse over cell in table, highlight cell on the canvas
+function highlightCellOnCanvas(cells, id) {
+  for (let cell in cells) {
+    if (cells[cell].id.toString() === id) {
+      cells[cell].highlighted = true;
+    } else {
+      cells[cell].highlighted = false;
+    }
+  }
+}
+
+//When mouse leaves cell in table, remove highlight from cell on the canvas
+function removeHighlightFromCellOnCanvas(cells) {
+  for (let cell in cells) {
+    cells[cell].highlighted = false;
+  }
+}
+
+//when clicking on a th in the table, sort the table by that column
+document.querySelector("table").addEventListener("click", (e) => {
+  if (e.target.tagName === "TH") {
+    sortTable(e.target.cellIndex);
+  }
+});
+
+//sort the table by the column
+function sortTable(n) {
+  var table,
+    rows,
+    switching,
+    i,
+    x,
+    y,
+    shouldSwitch,
+    dir,
+    switchcount = 0;
+  table = document.getElementById("cell-statistik");
+  switching = true;
+  //Set the sorting direction to ascending:
+  dir = "asc";
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < rows.length - 1; i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /*check if the two rows should switch place,
+      based on the direction, asc or desc:*/
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          //if so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      //Each time a switch is done, increase this count by 1:
+      switchcount++;
+    } else {
+      /*If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again.*/
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
 }
