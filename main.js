@@ -19,8 +19,6 @@ const {
   cellStatistik,
   generationSlider,
   generationSliderValue,
-  prevGeneration,
-  nextGeneration,
 } = init();
 
 const STARTING_CELL_OPTIONS = {
@@ -86,8 +84,6 @@ let cells = [];
 const cell = new Cell(STARTING_CELL_OPTIONS);
 cells.push(cell);
 
-let activeSections = {};
-
 let deadCells = [];
 
 getArrayOfRelatives(cells, deadCells);
@@ -104,7 +100,6 @@ updateSimulation();
 
 function updateSimulation() {
   const animationID = requestAnimationFrame(updateSimulation);
-  updateActiveSections(activeSections, foodSections);
   c.clearRect(0, 0, SIZE_OF_CANVAS, SIZE_OF_CANVAS);
 
   Object.keys(foodSections).forEach((section) => {
@@ -122,13 +117,13 @@ function updateSimulation() {
       deadCells,
       SIZE_OF_CANVAS,
       SECTION_SIZE,
-      activeSections,
       animationID
     );
   });
 
   if (cellLength !== cells.length) {
-    if (cells.length < cellLength) {
+    document.getElementById("cells").textContent = cells.length;
+    if (cellLength > cells.length) {
       getArrayOfRelatives(cells, deadCells);
     }
 
@@ -168,7 +163,7 @@ function drawDifferentSpecies(relatives) {
   let x = 100;
   let y = 100;
   for (let cell in relatives) {
-    relatives[cell].drawSpecis(c2, x, y);
+    relatives[cell].draw(c2, x, y, 0, false);
     x += 100;
     if (x > 800) {
       x = 100;
@@ -202,11 +197,11 @@ function getStatsForIndividualCellsInArray(arrayOfCells) {
 }
 
 function getStatsFromCellsArray(arrayOfCells, heading) {
-  let radius = 0;
-  let jump = 0;
-  let energiEff = 0;
-  let celldelningsEff = 0;
-  let speed = 0;
+  let radius = 0,
+    jump = 0,
+    energiEff = 0,
+    celldelningsEff = 0,
+    speed = 0;
 
   for (let cell in arrayOfCells) {
     radius += arrayOfCells[cell].radius / arrayOfCells.length;
@@ -282,7 +277,7 @@ function drawFamilyTree(cells) {
     cells[cell].y = y;
     cells[cell].energi = 0;
     cells[cell].celldelningsProgress = 0;
-    cells[cell].draw(cells, c);
+    cells[cell].draw(c, x, y, 0, false);
   }
   for (let i = 0; i < cells[cells.length - 1].id.length + 1; i++) {
     for (let cell in cells) {
@@ -305,9 +300,6 @@ function drawFamilyTree(cells) {
         }
       }
     }
-  }
-  for (let cell in cells) {
-    cells[cell].draw(cells, c);
   }
 }
 
@@ -344,33 +336,12 @@ function drawFoodSections(SIZE_OF_CANVAS, AMOUNT_OF_FOOD, SECTION_SIZE) {
   return foodSections;
 }
 
-function updateActiveSections(activeSections, foodSections) {
-  const newActiveSections = {};
-
-  for (let section in activeSections) {
-    const [sectionX, sectionY] = section.split(",");
-
-    for (let x = -1; x <= 1; x++) {
-      for (let y = -1; y <= 1; y++) {
-        const key = parseInt(sectionX) + x + "," + (parseInt(sectionY) + y);
-
-        if (foodSections[key]) {
-          newActiveSections[key] = foodSections[key];
-        }
-      }
-    }
-  }
-
-  return newActiveSections;
-}
-
 document.querySelector("table").addEventListener("mouseleave", (e) => {
   removeHighlightFromCellOnCanvas(cells);
 });
 
 document.querySelector("table").addEventListener("mouseover", (e) => {
   if (e.target.tagName === "TD") {
-    console.log(e.target.id);
     highlightCellOnCanvas(cells, e.target.id);
   }
 });

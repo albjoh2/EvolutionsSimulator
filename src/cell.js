@@ -24,31 +24,32 @@ export default class Cell {
     this.orientationChangeChance = options.orientationChangeChance;
   }
 
-  draw(cells, c) {
-    if (cells) {
-      c.save();
-      c.translate(this.x, this.y);
-      c.rotate(-this.orientation);
-      c.beginPath();
-      c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
-      const grd = c.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-      grd.addColorStop(
-        0,
-        `rgba(${this.innerColor.r},${this.innerColor.g},${this.innerColor.b},${this.innerColor.o})`
-      );
-      grd.addColorStop(
-        1,
-        `rgba(${this.color.r},${this.color.g},${this.color.b},${this.color.o})`
-      );
-      if (this.highlighted) {
-        c.strokeStyle = "#ff4455";
-        c.lineWidth = 2;
-        c.stroke();
-      }
+  draw(c, x, y, orientation, alive) {
+    c.save();
 
-      c.fillStyle = grd;
-      c.fill();
+    c.translate(x, y);
+    c.rotate(-orientation);
+    c.beginPath();
+    c.arc(0, 0, this.radius, 0, Math.PI * 2, false);
+    const grd = c.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+    grd.addColorStop(
+      0,
+      `rgba(${this.innerColor.r},${this.innerColor.g},${this.innerColor.b},${this.innerColor.o})`
+    );
+    grd.addColorStop(
+      1,
+      `rgba(${this.color.r},${this.color.g},${this.color.b},${this.color.o})`
+    );
+    if (this.highlighted) {
+      c.strokeStyle = "#ff4455";
+      c.lineWidth = 2;
+      c.stroke();
+    }
 
+    c.fillStyle = grd;
+    c.fill();
+
+    if (alive) {
       c.beginPath();
       c.fillStyle = "#3df322";
       c.fillRect(
@@ -65,56 +66,16 @@ export default class Cell {
         ((this.radius * 2) / this.maxEnergi) * this.energi,
         3
       );
-      c.restore();
-    } else {
-      c.beginPath();
-
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-
-      const grd = c.createRadialGradient(
-        this.x,
-        this.y,
-        0,
-        this.x,
-        this.y,
-        this.radius
-      );
-
-      grd.addColorStop(
-        0,
-        `rgba(${this.innerColor.r},${this.innerColor.g},${this.innerColor.b},${this.innerColor.o})`
-      );
-      grd.addColorStop(
-        1,
-        `rgba(${this.color.r},${this.color.g},${this.color.b},${this.color.o})`
-      );
-
-      c.fillStyle = grd;
-      c.fill();
     }
-  }
 
-  drawSpecis(c, x, y) {
-    c.beginPath();
-    c.arc(x, y, this.radius, 0, Math.PI * 2, false);
-    const grd = c.createRadialGradient(x, y, 0, x, y, this.radius);
-    grd.addColorStop(
-      0,
-      `rgba(${this.innerColor.r},${this.innerColor.g},${this.innerColor.b},${this.innerColor.o})`
-    );
-    grd.addColorStop(
-      1,
-      `rgba(${this.color.r},${this.color.g},${this.color.b},${this.color.o})`
-    );
-    c.fillStyle = grd;
-    c.fill();
+    c.restore();
   }
 
   update(cells, c, foods, deadCells, SIZE_OF_CANVAS, SECTION_SIZE) {
     this.#move(SIZE_OF_CANVAS);
     this.#jump(SIZE_OF_CANVAS);
     this.#updateOrientation();
-    this.draw(cells, c);
+    this.draw(c, this.x, this.y, this.orientation, true);
 
     if (this.energi >= 0) {
       this.energi -=
@@ -149,7 +110,7 @@ export default class Cell {
   }
 
   #updateOrientation() {
-    // change the target orientation randomly with a probability of 0.1%
+    // change the target orientation randomly
     if (Math.random() < this.orientationChangeChance) {
       this.targetOrientation += (Math.random() * Math.PI) / 4 - Math.PI / 8;
     }
@@ -221,12 +182,11 @@ export default class Cell {
       orientationChangeChance: this.#mutate(this.orientationChangeChance),
     };
     cells.push(new Cell(cellOptions));
-    document.getElementById("cells").textContent = cells.length;
     this.celldelningsProgress = 0;
     this.energi = this.maxEnergi / 2;
   }
 
-  #mutate(valueToMutate, mutationType = "exponential", mutationAmount = 20) {
+  #mutate(valueToMutate, mutationType = "exponential", mutationAmount = 50) {
     if (Math.random() < this.mutationRate) {
       if (mutationType === "exponential") {
         return (
@@ -259,7 +219,7 @@ export default class Cell {
     this.y -= Math.cos(this.orientation) * this.speed;
   }
 
-  #jump(SIZE_OF_CANVAS) {
+  #jump() {
     const jumpY = Math.random();
     const jumpX = Math.random();
     if (jumpX > 0.6666) {
