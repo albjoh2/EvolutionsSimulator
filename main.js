@@ -146,24 +146,23 @@ function updateSimulation() {
 }
 
 function getArrayOfRelatives(cells, deadCells) {
-  let relatives = [];
-  let allCells = cells.concat(deadCells);
-  let generationToDraw = generationSlider.value;
-  for (let cell in cells) {
-    let parentID = cells[cell].id.slice(0, generationToDraw);
-    for (let cell in allCells) {
-      if (
-        JSON.stringify(allCells[cell].id) === JSON.stringify(parentID) &&
-        relatives.indexOf(allCells[cell]) === -1
-      ) {
-        relatives.push(allCells[cell]);
+  const relatives = new Set();
+  const allCells = cells.concat(deadCells);
+  const generationToDraw = generationSlider.value;
+  const parentIDs = cells.map((cell) => cell.id.slice(0, generationToDraw));
+  for (const cell of allCells) {
+    const cellID = JSON.stringify(cell.id);
+    for (const parentID of parentIDs) {
+      if (cellID === JSON.stringify(parentID)) {
+        relatives.add(cell);
+        break;
       }
     }
   }
-  drawDifferentSpecis(relatives);
+  drawDifferentSpecies([...relatives]);
 }
 
-function drawDifferentSpecis(relatives) {
+function drawDifferentSpecies(relatives) {
   generationSliderValue.innerHTML = generationSlider.value;
   c2.clearRect(0, 0, SIZE_OF_CANVAS, SIZE_OF_CANVAS);
   let x = 100;
