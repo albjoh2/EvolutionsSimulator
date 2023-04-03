@@ -10,13 +10,13 @@ export default class Cell {
     this.innerColor = options.innerColor;
     this.color = options.color;
     this.jumpLength = options.jumpLength;
-    this.energiUpptagning = options.energiUpptagning;
-    this.delningsEffektivitet = options.delningsEffektivitet;
-    this.maxEnergi = Math.min(options.maxEnergi, this.radius * 100);
+    this.energyEfficiency = options.energyEfficiency;
+    this.splitEfficiency = options.splitEfficiency;
+    this.maxEnergy = Math.min(options.maxEnergy, this.radius * 100);
     this.mutationRate = options.mutationRate;
     this.mutationAmount = options.mutationAmount;
-    this.celldelningsProgress = 0;
-    this.energi = this.maxEnergi / 2;
+    this.splitProgress = 0;
+    this.energy = this.maxEnergy / 2;
     this.children = 0;
     this.highlighted = false;
     this.targetOrientation = options.orientation;
@@ -50,25 +50,23 @@ export default class Cell {
     c.fill();
 
     if (alive) {
-      c.beginPath();
-      c.fillStyle = "#3df322";
-      c.fillRect(
-        -this.radius,
-        +this.radius * 1.5,
-        ((this.radius * 2) / 1000) * this.celldelningsProgress,
-        3
-      );
-
-      c.fillStyle = "blue";
-      c.fillRect(
-        -this.radius,
-        +this.radius * 1.1,
-        ((this.radius * 2) / this.maxEnergi) * this.energi,
-        3
-      );
+      this.#drawProgressBar(c, this.energy, this.maxEnergy, 1.1, "#0000FF");
+      this.#drawProgressBar(c, this.splitProgress, 1000, 1.5, "#dd5500");
     }
 
     c.restore();
+  }
+
+  #drawProgressBar(c, val, maxVal, drawY, color) {
+    c.beginPath();
+    c.fillStyle = color;
+
+    c.fillRect(
+      -this.radius,
+      +this.radius * drawY,
+      ((this.radius * 2) / maxVal) * val,
+      3
+    );
   }
 
   update(cells, c, foods, deadCells, SIZE_OF_CANVAS, SECTION_SIZE) {
@@ -76,30 +74,26 @@ export default class Cell {
     this.#jump(SIZE_OF_CANVAS);
     this.#updateOrientation();
     this.draw(c, this.x, this.y, this.orientation, true);
+    this.energy = this.#energyConsumption(this.energy, 50);
+    this.splitProgress = this.#energyConsumption(this.splitProgress, 100);
+    this.#eat(foods, SECTION_SIZE);
+    if (this.splitProgress > 1000) {
+      this.#reproduce(cells);
+    }
+    if (this.energy <= 0) {
+      this.#die(cells, deadCells);
+    }
+  }
 
-    if (this.energi >= 0) {
-      this.energi -=
+  #energyConsumption(resource, deteriorationSpeed) {
+    if (resource >= 0) {
+      resource -=
         (Math.pow(this.speed + 1, 8) +
           Math.pow(this.jumpLength + 1, 10) +
           Math.pow(this.radius + 1, 1.1)) /
-        50;
+        deteriorationSpeed;
     }
-    if (this.celldelningsProgress >= 0) {
-      this.celldelningsProgress -=
-        this.speed / 4 +
-        Math.pow(this.jumpLength + 1, 3) / 2 +
-        Math.pow(this.radius, 3) / 100;
-    }
-
-    this.#eat(foods, SECTION_SIZE);
-
-    if (this.celldelningsProgress > 1000) {
-      this.#reproduce(cells);
-    }
-
-    if (this.energi <= 0) {
-      this.#die(cells, deadCells);
-    }
+    return resource;
   }
 
   #die(cells, deadCells) {
@@ -138,11 +132,11 @@ export default class Cell {
         if (radius >= 0.005) {
           food.radius -= 0.003;
         }
-        if (this.energi >= this.maxEnergi) {
-          this.celldelningsProgress +=
-            this.delningsEffektivitet * (Math.pow(radius, 2) / 2);
+        if (this.energy >= this.maxEnergy) {
+          this.splitProgress +=
+            this.splitEfficiency * (Math.pow(radius, 2) / 2);
         } else if (radius > 0.3) {
-          this.energi += this.energiUpptagning * Math.pow(radius, 2);
+          this.energy += this.energyEfficiency * Math.pow(radius, 2);
         }
       }
     }
@@ -172,9 +166,9 @@ export default class Cell {
         o: this.#mutate(this.color.o, "fixed", 0.1),
       },
       jumpLength: this.#mutate(this.jumpLength),
-      energiUpptagning: this.#mutate(this.energiUpptagning),
-      delningsEffektivitet: this.#mutate(this.delningsEffektivitet),
-      maxEnergi: this.#mutate(this.maxEnergi),
+      energyEfficiency: this.#mutate(this.energyEfficiency),
+      splitEfficiency: this.#mutate(this.splitEfficiency),
+      maxEnergy: this.#mutate(this.maxEnergy),
       mutationRate: this.#mutate(this.mutationRate),
       mutationAmount: this.#mutate(this.mutationAmount),
       targetOrientation: Math.random() * 2 * Math.PI,
@@ -182,8 +176,8 @@ export default class Cell {
       orientationChangeChance: this.#mutate(this.orientationChangeChance),
     };
     cells.push(new Cell(cellOptions));
-    this.celldelningsProgress = 0;
-    this.energi = this.maxEnergi / 2;
+    this.splitProgress = 0;
+    this.energy = this.maxEnergy / 2;
   }
 
   #mutate(valueToMutate, mutationType = "exponential", mutationAmount = 50) {

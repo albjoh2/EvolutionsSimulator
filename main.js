@@ -32,9 +32,9 @@ const STARTING_CELL_OPTIONS = {
   innerColor: { r: 127, g: 127, b: 127, o: 0.5 },
   color: { r: 127, g: 127, b: 127, o: 0.5 },
   jumpLength: 0.2,
-  energiUpptagning: 1,
-  delningsEffektivitet: 1,
-  maxEnergi: 300,
+  energyEfficiency: 1,
+  splitEfficiency: 1,
+  maxEnergy: 300,
   mutationRate: 0.15,
   mutationAmount: 0.5,
   targetOrientation: Math.random() * 2 * Math.PI,
@@ -181,13 +181,11 @@ function getStatsForIndividualCellsInArray(arrayOfCells) {
     statsRow += `<tr>
     <td id="${cells[cell].id}">${cells[cell].radius.toFixed(2)}</td> 
     <td id="${cells[cell].id}">${cells[cell].jumpLength.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].energiUpptagning.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].delningsEffektivitet.toFixed(
-      2
-    )}</td>
+    <td id="${cells[cell].id}">${cells[cell].energyEfficiency.toFixed(2)}</td>
+    <td id="${cells[cell].id}">${cells[cell].splitEfficiency.toFixed(2)}</td>
     <td id="${cells[cell].id}">${cells[cell].speed.toFixed(3)}</td>
     <td id="${cells[cell].id}">${cells[cell].id.length}</td>
-    <td id="${cells[cell].id}">${cells[cell].maxEnergi.toFixed(0)} </td>
+    <td id="${cells[cell].id}">${cells[cell].maxEnergy.toFixed(0)} </td>
     <td id="${cells[cell].id}">${cells[cell].mutationRate.toFixed(2)}</td>
     <td id="${cells[cell].id}">${cells[cell].mutationAmount.toFixed(2)}</td>
     </tr>`;
@@ -199,16 +197,15 @@ function getStatsForIndividualCellsInArray(arrayOfCells) {
 function getStatsFromCellsArray(arrayOfCells, heading) {
   let radius = 0,
     jump = 0,
-    energiEff = 0,
+    energyEff = 0,
     celldelningsEff = 0,
     speed = 0;
 
   for (let cell in arrayOfCells) {
     radius += arrayOfCells[cell].radius / arrayOfCells.length;
     jump += arrayOfCells[cell].jumpLength / arrayOfCells.length;
-    energiEff += arrayOfCells[cell].energiUpptagning / arrayOfCells.length;
-    celldelningsEff +=
-      arrayOfCells[cell].delningsEffektivitet / arrayOfCells.length;
+    energyEff += arrayOfCells[cell].energyEfficiency / arrayOfCells.length;
+    celldelningsEff += arrayOfCells[cell].splitEfficiency / arrayOfCells.length;
     if (arrayOfCells[cell].speed > 0.01) {
       speed += arrayOfCells[cell].speed / arrayOfCells.length;
     }
@@ -217,7 +214,7 @@ function getStatsFromCellsArray(arrayOfCells, heading) {
   let stats = `<h2>${heading}</h2>
   <p>Size: ${radius.toFixed(2)} </p>
   <p>Wiggle: ${jump.toFixed(2)} </p>
-  <p>Energy efficiency: ${energiEff.toFixed(2)} </p>
+  <p>Energy efficiency: ${energyEff.toFixed(2)} </p>
   <p>Breeding efficiency: ${celldelningsEff.toFixed(2)} </p>
   <p>Speed: ${speed.toFixed(2)}</p>
   `;
@@ -275,7 +272,7 @@ function drawFamilyTree(cells) {
     lastCellsGeneration = generation;
     cells[cell].x = x;
     cells[cell].y = y;
-    cells[cell].energi = 0;
+    cells[cell].energy = 0;
     cells[cell].celldelningsProgress = 0;
     cells[cell].draw(c, x, y, 0, false);
   }
