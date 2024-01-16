@@ -91,7 +91,7 @@ export default class Cell {
     if (resource >= 0) {
       resource -=
         (Math.pow(this.speed + 1, 8) +
-          Math.pow(this.jumpLength + 1, 12) +
+          Math.pow(this.jumpLength + 1, 11) +
           Math.pow(this.radius + 1, 1.1) +
           this.lifetime / 10000) /
         deteriorationSpeed;
