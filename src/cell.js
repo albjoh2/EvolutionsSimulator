@@ -22,6 +22,7 @@ export default class Cell {
     this.targetOrientation = options.orientation;
     this.orientationChangeSpeed = options.orientationChangeSpeed;
     this.orientationChangeChance = options.orientationChangeChance;
+    this.lifetime = 0;
   }
 
   draw(c, x, y, orientation, alive) {
@@ -77,6 +78,7 @@ export default class Cell {
     this.energy = this.#energyConsumption(this.energy, 50);
     this.splitProgress = this.#energyConsumption(this.splitProgress, 100);
     this.#eat(foods, SECTION_SIZE);
+    this.lifetime++;
     if (this.splitProgress > 1000) {
       this.#reproduce(cells);
     }
@@ -89,8 +91,9 @@ export default class Cell {
     if (resource >= 0) {
       resource -=
         (Math.pow(this.speed + 1, 8) +
-          Math.pow(this.jumpLength + 1, 10) +
-          Math.pow(this.radius + 1, 1.1)) /
+          Math.pow(this.jumpLength + 1, 12) +
+          Math.pow(this.radius + 1, 1.1) +
+          this.lifetime / 10000) /
         deteriorationSpeed;
     }
     return resource;

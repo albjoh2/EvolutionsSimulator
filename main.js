@@ -1,7 +1,9 @@
 import "./style.css";
 import Food from "./src/food.js";
 import Cell from "./src/cell.js";
+import Table from "./src/table.js";
 import { config } from "./src/config.js";
+import FamilyTree from "./src/familyTree.js";
 
 const {
   SIZE_OF_CANVAS,
@@ -16,6 +18,7 @@ const {
   c2,
   aliveStats,
   deadStats,
+
   cellStatistik,
   generationSlider,
   generationSliderValue,
@@ -80,6 +83,8 @@ function init() {
   };
 }
 
+const table = new Table();
+
 let cells = [];
 const cell = new Cell(STARTING_CELL_OPTIONS);
 cells.push(cell);
@@ -131,10 +136,16 @@ function updateSimulation() {
 
     aliveStats.innerHTML = getStatsFromCellsArray(cells, "Alive stats");
     deadStats.innerHTML = getStatsFromCellsArray(deadCells, "Dead stats");
-    cellStatistik.innerHTML = getStatsForIndividualCellsInArray(cells);
+    table.update(cells);
 
     if (cells.length === 0) {
-      drawFamilyTree(deadCells);
+      canvas2.style.display = "none";
+      aliveStats.style.display = "none";
+      deadStats.style.display = "none";
+      cellStatistik.style.display = "none";
+      generationSlider.style.display = "none";
+      generationSliderValue.style.display = "none";
+      new FamilyTree(deadCells, c);
       cancelAnimationFrame(animationID);
     }
   }
@@ -172,28 +183,6 @@ function drawDifferentSpecies(relatives) {
   }
 }
 
-function getStatsForIndividualCellsInArray(arrayOfCells) {
-  let statsRow = "";
-  let statsRubriker =
-    "<thead><th>Radius</th> <th>Wiggle</th> <th>Energy effectivity</th> <th>Breeding effectivity</th> <th>Speed</th> <th>Generation</th><th>Energy</th><th>Mutation Rate</th><th>Mutation Amount</th></thead>";
-
-  for (let cell in arrayOfCells) {
-    statsRow += `<tr>
-    <td id="${cells[cell].id}">${cells[cell].radius.toFixed(2)}</td> 
-    <td id="${cells[cell].id}">${cells[cell].jumpLength.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].energyEfficiency.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].splitEfficiency.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].speed.toFixed(3)}</td>
-    <td id="${cells[cell].id}">${cells[cell].id.length}</td>
-    <td id="${cells[cell].id}">${cells[cell].maxEnergy.toFixed(0)} </td>
-    <td id="${cells[cell].id}">${cells[cell].mutationRate.toFixed(2)}</td>
-    <td id="${cells[cell].id}">${cells[cell].mutationAmount.toFixed(2)}</td>
-    </tr>`;
-  }
-
-  return statsRubriker + "<tbody>" + statsRow + "</tbody>";
-}
-
 function getStatsFromCellsArray(arrayOfCells, heading) {
   let radius = 0,
     jump = 0,
@@ -220,84 +209,6 @@ function getStatsFromCellsArray(arrayOfCells, heading) {
   `;
 
   return stats;
-}
-
-function drawFamilyTree(cells) {
-  canvas2.style.display = "none";
-  aliveStats.style.display = "none";
-  deadStats.style.display = "none";
-  cellStatistik.style.display = "none";
-  generationSlider.style.display = "none";
-  generationSliderValue.style.display = "none";
-
-  drawCanvas(canvas, window.innerWidth, 20000);
-
-  cells.sort((a, b) => {
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-  });
-  cells.sort((a, b) => {
-    if (a.id.length < b.id.length) {
-      return -1;
-    }
-    if (a.id.length > b.id.length) {
-      return +1;
-    }
-  });
-
-  let y = 30;
-  let x = 0;
-  let lastCellsGeneration = 0;
-  let pappasGenerationsBarn = 1;
-  let lastCellsPapi = 1;
-  for (let cell in cells) {
-    let generation = cells[cell].id.length;
-    y = 25 * generation;
-    x += 20;
-
-    if (
-      JSON.stringify(cells[cell].id.slice(0, -1)) !==
-      JSON.stringify(lastCellsPapi)
-    ) {
-      x += 15;
-    }
-
-    if (lastCellsGeneration !== generation) {
-      x = canvas.width / 2 - 20 * (pappasGenerationsBarn / 2) + 12.5;
-      pappasGenerationsBarn = 0;
-    }
-
-    lastCellsPapi = cells[cell].id.slice(0, -1);
-    pappasGenerationsBarn += cells[cell].children;
-    lastCellsGeneration = generation;
-    cells[cell].x = x;
-    cells[cell].y = y;
-    cells[cell].energy = 0;
-    cells[cell].celldelningsProgress = 0;
-    cells[cell].draw(c, x, y, 0, false);
-  }
-  for (let i = 0; i < cells[cells.length - 1].id.length + 1; i++) {
-    for (let cell in cells) {
-      if (cells[cell].id.length === i) {
-        let cellToGetParent = cell;
-        let parentCell = cells[cell].id.slice(0, -1);
-
-        for (let cell in cells) {
-          if (JSON.stringify(cells[cell].id) === JSON.stringify(parentCell)) {
-            c.beginPath();
-            c.lineWidth = 0.5;
-            c.strokeStyle = "black";
-            c.moveTo(cells[cell].x, cells[cell].y + cells[cell].radius);
-            c.lineTo(
-              cells[cellToGetParent].x,
-              cells[cellToGetParent].y - cells[cellToGetParent].radius
-            );
-            c.stroke();
-          }
-        }
-      }
-    }
-  }
 }
 
 function drawCanvas(canvas, width, height) {
@@ -358,76 +269,5 @@ function highlightCellOnCanvas(cells, id) {
 function removeHighlightFromCellOnCanvas(cells) {
   for (let cell in cells) {
     cells[cell].highlighted = false;
-  }
-}
-
-//when clicking on a th in the table, sort the table by that column
-document.querySelector("table").addEventListener("click", (e) => {
-  if (e.target.tagName === "TH") {
-    sortTable(e.target.cellIndex);
-  }
-});
-
-//sort the table by the column
-function sortTable(n) {
-  var table,
-    rows,
-    switching,
-    i,
-    x,
-    y,
-    shouldSwitch,
-    dir,
-    switchcount = 0;
-  table = document.getElementById("cell-statistik");
-  switching = true;
-  //Set the sorting direction to ascending:
-  dir = "asc";
-  /*Make a loop that will continue until
-  no switching has been done:*/
-  while (switching) {
-    //start by saying: no switching is done:
-    switching = false;
-    rows = table.rows;
-    /*Loop through all table rows (except the
-    first, which contains table headers):*/
-    for (i = 1; i < rows.length - 1; i++) {
-      //start by saying there should be no switching:
-      shouldSwitch = false;
-      /*Get the two elements you want to compare,
-      one from current row and one from the next:*/
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-      /*check if the two rows should switch place,
-      based on the direction, asc or desc:*/
-      if (dir == "asc") {
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          //if so, mark as a switch and break the loop:
-          shouldSwitch = true;
-          break;
-        }
-      } else if (dir == "desc") {
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          //if so, mark as a switch and break the loop:
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
-    if (shouldSwitch) {
-      /*If a switch has been marked, make the switch
-      and mark that a switch has been done:*/
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      //Each time a switch is done, increase this count by 1:
-      switchcount++;
-    } else {
-      /*If no switching has been done AND the direction is "asc",
-      set the direction to "desc" and run the while loop again.*/
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
   }
 }

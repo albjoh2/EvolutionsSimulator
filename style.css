@@ -87,6 +87,10 @@ th {
   font-size: 0.7rem;
 }
 
+th:hover {
+  cursor: pointer;
+}
+
 .stats-element {
   display: flex;
   flex-direction: column;
