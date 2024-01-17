@@ -2,6 +2,7 @@ import "./style.css";
 import Food from "./src/food.js";
 import Cell from "./src/cell.js";
 import Table from "./src/table.js";
+import Canvas from "./src/canvas.js";
 import { config } from "./src/config.js";
 import FamilyTree from "./src/familyTree.js";
 
@@ -14,11 +15,12 @@ const {
 } = config;
 
 const {
+  canvas,
+  canvas2,
   c,
   c2,
   aliveStats,
   deadStats,
-
   cellStatistik,
   generationSlider,
   generationSliderValue,
@@ -46,8 +48,8 @@ const STARTING_CELL_OPTIONS = {
 };
 
 function init() {
-  const canvas = document.getElementById("canvas");
-  const canvas2 = document.getElementById("canvas2");
+  const canvas = new Canvas(SIZE_OF_CANVAS, SIZE_OF_CANVAS, "canvas");
+  const canvas2 = new Canvas(SIZE_OF_CANVAS, SIZE_OF_CANVAS, "canvas2");
   const aliveStats = document.getElementById("alive-stats");
   const deadStats = document.getElementById("dead-stats");
   const cellStatistik = document.getElementById("cell-statistik");
@@ -67,12 +69,14 @@ function init() {
     getArrayOfRelatives(cells, deadCells);
   });
 
-  const [c, c2] = [canvas.getContext("2d"), canvas2.getContext("2d")];
-
-  drawCanvas(canvas, SIZE_OF_CANVAS, SIZE_OF_CANVAS);
-  drawCanvas(canvas2, SIZE_OF_CANVAS, SIZE_OF_CANVAS);
+  const [c, c2] = [
+    canvas.draw(SIZE_OF_CANVAS, SIZE_OF_CANVAS),
+    canvas2.draw(SIZE_OF_CANVAS, SIZE_OF_CANVAS),
+  ];
 
   return {
+    canvas,
+    canvas2,
     c,
     c2,
     aliveStats,
@@ -139,7 +143,7 @@ function updateSimulation() {
     table.update(cells);
 
     if (cells.length === 0) {
-      canvas2.style.display = "none";
+      canvas2.hide();
       aliveStats.style.display = "none";
       deadStats.style.display = "none";
       cellStatistik.style.display = "none";
@@ -209,11 +213,6 @@ function getStatsFromCellsArray(arrayOfCells, heading) {
   `;
 
   return stats;
-}
-
-function drawCanvas(canvas, width, height) {
-  canvas.width = width;
-  canvas.height = height;
 }
 
 function drawFoodSections(SIZE_OF_CANVAS, AMOUNT_OF_FOOD, SECTION_SIZE) {
