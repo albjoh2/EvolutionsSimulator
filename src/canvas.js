@@ -1,4 +1,4 @@
-export default class Table {
+export default class Canvas {
   constructor(width, height, canvas) {
     this.width = width;
     this.height = height;

@@ -26,105 +26,53 @@ export default class Table {
     );
   }
 
+  //When holding mouse over cell in table, highlight cell on the canvas
+  highlightCellOnCanvas(cells, id) {
+    for (let cell in cells) {
+      if (cells[cell].id.toString() === id) {
+        cells[cell].highlighted = true;
+      } else {
+        cells[cell].highlighted = false;
+      }
+    }
+  }
+
+  //When mouse leaves cell in table, remove highlight from cell on the canvas
+  removeHighlightFromCellOnCanvas(cells) {
+    for (let cell in cells) {
+      cells[cell].highlighted = false;
+    }
+  }
+
   //sort the table by the column
   #sortCellsArrayByColumn(cells, column) {
-    if (this.sortedReverse) {
-      switch (column) {
-        case 0:
-          cells.sort((a, b) => {
-            return b.radius - a.radius;
-          });
-          break;
-        case 1:
-          cells.sort((a, b) => {
-            return b.jumpLength - a.jumpLength;
-          });
-          break;
-        case 2:
-          cells.sort((a, b) => {
-            return b.energyEfficiency - a.energyEfficiency;
-          });
-          break;
-        case 3:
-          cells.sort((a, b) => {
-            return b.splitEfficiency - a.splitEfficiency;
-          });
-          break;
-        case 4:
-          cells.sort((a, b) => {
-            return b.speed - a.speed;
-          });
-          break;
-        case 5:
-          cells.sort((a, b) => {
-            return b.id.length - a.id.length;
-          });
-          break;
-        case 6:
-          cells.sort((a, b) => {
-            return b.maxEnergy - a.maxEnergy;
-          });
-          break;
-        case 7:
-          cells.sort((a, b) => {
-            return b.mutationRate - a.mutationRate;
-          });
-          break;
-        case 8:
-          cells.sort((a, b) => {
-            return b.mutationAmount - a.mutationAmount;
-          });
-          break;
-      }
-      return cells;
+    const properties = [
+      "radius",
+      "jumpLength",
+      "energyEfficiency",
+      "splitEfficiency",
+      "speed",
+      "id",
+      "maxEnergy",
+      "mutationRate",
+      "mutationAmount",
+    ];
+
+    // Special case for 'id' property, which needs to sort by length
+    if (properties[column] === "id") {
+      cells.sort((a, b) => {
+        return this.sortedReverse
+          ? b.id.length - a.id.length
+          : a.id.length - b.id.length;
+      });
+    } else {
+      cells.sort((a, b) => {
+        return this.sortedReverse
+          ? b[properties[column]] - a[properties[column]]
+          : a[properties[column]] - b[properties[column]];
+      });
     }
-    switch (column) {
-      case 0:
-        cells.sort((a, b) => {
-          return a.radius - b.radius;
-        });
-        break;
-      case 1:
-        cells.sort((a, b) => {
-          return a.jumpLength - b.jumpLength;
-        });
-        break;
-      case 2:
-        cells.sort((a, b) => {
-          return a.energyEfficiency - b.energyEfficiency;
-        });
-        break;
-      case 3:
-        cells.sort((a, b) => {
-          return a.splitEfficiency - b.splitEfficiency;
-        });
-        break;
-      case 4:
-        cells.sort((a, b) => {
-          return a.speed - b.speed;
-        });
-        break;
-      case 5:
-        cells.sort((a, b) => {
-          return a.id.length - b.id.length;
-        });
-        break;
-      case 6:
-        cells.sort((a, b) => {
-          return a.maxEnergy - b.maxEnergy;
-        });
-        break;
-      case 7:
-        cells.sort((a, b) => {
-          return a.mutationRate - b.mutationRate;
-        });
-        break;
-      case 8:
-        cells.sort((a, b) => {
-          return a.mutationAmount - b.mutationAmount;
-        });
-        break;
-    }
+
     return cells;
   }
 
