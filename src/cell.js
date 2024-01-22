@@ -103,7 +103,6 @@ export default class Cell {
     this.highlighted = false;
     deadCells.push(this);
     cells.splice(cells.indexOf(this), 1);
-    document.getElementById("cells").textContent = cells.length;
   }
 
   #updateOrientation() {
@@ -157,15 +156,15 @@ export default class Cell {
       orientation: Math.random() * 2 * Math.PI,
       radius: this.#mutate(this.radius),
       innerColor: {
-        r: this.#mutate(this.innerColor.r, "fixed"),
-        g: this.#mutate(this.innerColor.g, "fixed"),
-        b: this.#mutate(this.innerColor.b, "fixed"),
+        r: this.#mutate(this.innerColor.r, "fixed", 160),
+        g: this.#mutate(this.innerColor.g, "fixed", 160),
+        b: this.#mutate(this.innerColor.b, "fixed", 160),
         o: this.#mutate(this.innerColor.o, "fixed", 0.1),
       },
       color: {
-        r: this.#mutate(this.color.r, "fixed"),
-        g: this.#mutate(this.color.g, "fixed"),
-        b: this.#mutate(this.color.b, "fixed"),
+        r: this.#mutate(this.color.r, "fixed", 160),
+        g: this.#mutate(this.color.g, "fixed", 160),
+        b: this.#mutate(this.color.b, "fixed", 160),
         o: this.#mutate(this.color.o, "fixed", 0.1),
       },
       jumpLength: this.#mutate(this.jumpLength),
@@ -183,15 +182,24 @@ export default class Cell {
     this.energy = this.maxEnergy / 2;
   }
 
-  #mutate(valueToMutate, mutationType = "exponential", mutationAmount = 50) {
+  #mutate(
+    valueToMutate,
+    mutationType = "exponential",
+    propertyMutationAmount = 1
+  ) {
     if (Math.random() < this.mutationRate) {
       if (mutationType === "exponential") {
         return (
           valueToMutate +
-          (Math.random() - 0.5) * this.mutationAmount * valueToMutate
+          (Math.random() - 0.5) *
+            this.mutationAmount *
+            (valueToMutate * propertyMutationAmount)
         );
       } else if (mutationType === "fixed") {
-        return valueToMutate + (Math.random() - 0.5) * mutationAmount;
+        return (
+          valueToMutate +
+          (Math.random() - 0.5) * (this.mutationAmount * propertyMutationAmount)
+        );
       }
     }
     return valueToMutate;

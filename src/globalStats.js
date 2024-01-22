@@ -7,6 +7,10 @@ export default class GlobalStats {
     this.element.innerHTML = this.getStatsFromCellsArray(cells, heading);
   }
 
+  hide() {
+    this.element.style.display = "none";
+  }
+
   getStatsFromCellsArray(arrayOfCells, heading) {
     let radius = 0,
       jump = 0,

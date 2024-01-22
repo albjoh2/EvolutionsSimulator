@@ -26,6 +26,10 @@ export default class Table {
     );
   }
 
+  hide() {
+    this.table.style.display = "none";
+  }
+
   //When holding mouse over cell in table, highlight cell on the canvas
   highlightCellOnCanvas(cells, id) {
     for (let cell in cells) {

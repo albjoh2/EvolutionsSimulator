@@ -2,14 +2,27 @@ export default class GenerationInspector {
   constructor(ctx, SIZE_OF_CANVAS) {
     this.generationSliderTextElement =
       document.getElementById("generationToShow");
-    this.generationSliderValue =
-      document.getElementById("specisGeneration").value;
+    this.generationSliderValue = 1;
     this.ctx = ctx;
     this.SIZE_OF_CANVAS = SIZE_OF_CANVAS;
+    this.specisGenerationValue = document.getElementById(
+      "specisGeneration"
+    ).value = 1;
   }
 
   getGenerationSliderValue() {
     return this.generationSliderValue;
+  }
+
+  setSpecisGenerationValue(value) {
+    this.specisGenerationValue = value;
+  }
+
+  hide() {
+    this.generationSliderTextElement.style.display = "none";
+    document.getElementById("prev").style.display = "none";
+    document.getElementById("next").style.display = "none";
+    document.getElementById("specisGeneration").style.display = "none";
   }
 
   setGenerationSliderValue(value) {
