@@ -23,6 +23,7 @@ export default class Cell {
     this.orientationChangeSpeed = options.orientationChangeSpeed;
     this.orientationChangeChance = options.orientationChangeChance;
     this.lifetime = 0;
+    this.hovered = false;
   }
 
   draw(c, x, y, orientation, alive) {
@@ -70,7 +71,15 @@ export default class Cell {
     );
   }
 
-  update(cells, c, foods, deadCells, SIZE_OF_CANVAS, SECTION_SIZE) {
+  update(
+    cells,
+    c,
+    foods,
+    deadCells,
+    deadCellsOfLivingFamilys,
+    SIZE_OF_CANVAS,
+    SECTION_SIZE
+  ) {
     this.#move(SIZE_OF_CANVAS);
     this.#jump(SIZE_OF_CANVAS);
     this.#updateOrientation();
@@ -79,11 +88,12 @@ export default class Cell {
     this.splitProgress = this.#energyConsumption(this.splitProgress, 100);
     this.#eat(foods, SECTION_SIZE);
     this.lifetime++;
+
     if (this.splitProgress > 1000) {
       this.#reproduce(cells);
     }
     if (this.energy <= 0) {
-      this.#die(cells, deadCells);
+      this.#die(cells, deadCells, deadCellsOfLivingFamilys);
     }
   }
 
@@ -99,8 +109,22 @@ export default class Cell {
     return resource;
   }
 
-  #die(cells, deadCells) {
+  hasLivingOffspring(cells) {
+    let ID = JSON.stringify(this.id);
+    for (let cell in cells) {
+      let cellID = JSON.stringify(cells[cell].id);
+      if (cellID.startsWith(ID)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  #die(cells, deadCells, deadCellsOfLivingFamilys) {
     this.highlighted = false;
+    if (this.children > 0) {
+      deadCellsOfLivingFamilys.push(this);
+    }
     deadCells.push(this);
     cells.splice(cells.indexOf(this), 1);
   }
@@ -132,13 +156,14 @@ export default class Cell {
         this.y + this.radius > y - radius
       ) {
         if (radius >= 0.005) {
-          food.radius -= 0.003;
+          food.radius -= 0.0005;
         }
+
         if (this.energy >= this.maxEnergy) {
           this.splitProgress +=
             this.splitEfficiency * (Math.pow(radius, 2) / 2);
         } else if (radius > 0.3) {
-          this.energy += this.energyEfficiency * Math.pow(radius, 2);
+          this.energy += this.energyEfficiency * Math.pow(radius, 1.5);
         }
       }
     }

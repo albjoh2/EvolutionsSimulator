@@ -11,6 +11,7 @@ class Main {
   constructor() {
     this.cells = [];
     this.deadCells = [];
+    this.deadCellsOfLivingFamilys = [];
     this.SIZE_OF_CANVAS = 900;
 
     this.STARTING_CELL_OPTIONS = {
@@ -18,12 +19,12 @@ class Main {
       x: this.SIZE_OF_CANVAS / 2,
       y: this.SIZE_OF_CANVAS / 2,
       maxSpeed: 0.2,
-      speed: 0.01,
+      speed: 0.0004,
       orientation: Math.random() * 2 * Math.PI,
-      radius: 6,
+      radius: 4,
       innerColor: { r: 127, g: 127, b: 127, o: 0.5 },
       color: { r: 127, g: 127, b: 127, o: 0.5 },
-      jumpLength: 0.2,
+      jumpLength: 0.1,
       energyEfficiency: 1,
       splitEfficiency: 1,
       maxEnergy: 300,
@@ -39,11 +40,13 @@ class Main {
       this.SIZE_OF_CANVAS,
       "canvas"
     );
+
     this.canvas2 = new Canvas(
       this.SIZE_OF_CANVAS,
       this.SIZE_OF_CANVAS,
       "canvas2"
     );
+
     this.c = this.canvas.draw(this.SIZE_OF_CANVAS, this.SIZE_OF_CANVAS);
     this.c2 = this.canvas2.draw(this.SIZE_OF_CANVAS, this.SIZE_OF_CANVAS);
 
@@ -77,7 +80,6 @@ class Main {
     document.querySelector("table").addEventListener("mouseleave", (e) => {
       this.table.removeHighlightFromCellOnCanvas(this.cells);
     });
-
     document.querySelector("table").addEventListener("mouseover", (e) => {
       if (e.target.tagName === "TD") {
         this.table.highlightCellOnCanvas(this.cells, e.target.id);
@@ -119,28 +121,51 @@ class Main {
         this.c,
         this.drawnFoodSections,
         this.deadCells,
+        this.deadCellsOfLivingFamilys,
         this.SIZE_OF_CANVAS,
-        this.foodSections.getSectionSize(),
-        this.animationID
+        this.foodSections.getSectionSize()
       );
     });
     if (this.cellLength !== this.cells.length) {
+      if (animationID % 1000 === 0) {
+        this.removeDeadCellsOfDeadFamilys();
+        this.generationInspector.getArrayOfRelatives(
+          this.cells,
+          this.deadCellsOfLivingFamilys
+        );
+      }
+
       document.getElementById("cells").textContent = this.cells.length;
-      this.generationInspector.getArrayOfRelatives(this.cells, this.deadCells);
       this.cellLength = this.cells.length;
       this.deadStatistics.update(this.cells, "Alive stats");
       this.aliveStatistics.update(this.deadCells, "Dead stats");
       this.table.update(this.cells);
+
       if (this.cells.length === 0) {
-        this.canvas2.hide();
-        this.aliveStatistics.hide();
-        this.deadStatistics.hide();
-        this.table.hide();
-        this.generationInspector.hide();
-        new FamilyTree(this.deadCells, this.c);
-        cancelAnimationFrame(animationID);
+        this.createFamilyTree(animationID);
       }
     }
+  }
+
+  createFamilyTree(animationID) {
+    this.canvas2.hide();
+    this.aliveStatistics.hide();
+    this.deadStatistics.hide();
+    this.table.hide();
+    this.generationInspector.hide();
+    new FamilyTree(this.deadCells, this.c);
+    cancelAnimationFrame(animationID);
+  }
+
+  removeDeadCellsOfDeadFamilys() {
+    this.deadCellsOfLivingFamilys.forEach((deadCell) => {
+      if (!deadCell.hasLivingOffspring(this.cells)) {
+        this.deadCellsOfLivingFamilys.splice(
+          this.deadCellsOfLivingFamilys.indexOf(deadCell),
+          1
+        );
+      }
+    });
   }
 }
 

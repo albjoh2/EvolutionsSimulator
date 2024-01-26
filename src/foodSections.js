@@ -3,10 +3,10 @@ import Food from "./food.js";
 export default class FoodSections {
   constructor(SIZE_OF_CANVAS) {
     this.SIZE_OF_CANVAS = SIZE_OF_CANVAS;
-    this.SIZE_OF_STARTING_FOOD = 3;
-    this.SECTION_SIZE = 20;
-    this.AMOUNT_OF_FOOD = 80;
-    this.FOOD_GROWTH_RATE = 900;
+    this.SIZE_OF_STARTING_FOOD = 3.5;
+    this.SECTION_SIZE = 10;
+    this.AMOUNT_OF_FOOD = 70; // lower = more food
+    this.FOOD_GROWTH_RATE = 1000;
     this.foodSections = {};
   }
 
@@ -35,7 +35,7 @@ export default class FoodSections {
       let y = Math.random() * this.SIZE_OF_CANVAS;
       let radius = Math.min(
         (Math.random() * (this.SIZE_OF_STARTING_FOOD - 0) + 0) /
-          (Math.abs(Math.abs(x) - Math.abs(y)) / 150) +
+          (Math.abs(Math.abs(x) - Math.abs(y)) / 50) +
           0.01,
         this.SIZE_OF_STARTING_FOOD
       );
