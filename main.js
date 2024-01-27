@@ -21,7 +21,7 @@ class Main {
       maxSpeed: 0.2,
       speed: 0.0004,
       orientation: Math.random() * 2 * Math.PI,
-      radius: 4,
+      radius: 5,
       innerColor: { r: 127, g: 127, b: 127, o: 0.5 },
       color: { r: 127, g: 127, b: 127, o: 0.5 },
       jumpLength: 0.1,
