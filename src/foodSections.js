@@ -3,10 +3,10 @@ import Food from "./food.js";
 export default class FoodSections {
   constructor(SIZE_OF_CANVAS) {
     this.SIZE_OF_CANVAS = SIZE_OF_CANVAS;
-    this.SIZE_OF_STARTING_FOOD = 4;
+    this.SIZE_OF_STARTING_FOOD = 3.5;
     this.SECTION_SIZE = 10;
     this.AMOUNT_OF_FOOD = 70; // lower = more food
-    this.FOOD_GROWTH_RATE = 1000;
+    this.FOOD_GROWTH_RATE = 1100;
     this.foodSections = {};
   }
 
